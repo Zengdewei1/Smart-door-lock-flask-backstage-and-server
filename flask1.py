@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-
+import flask
 from flask import Flask,render_template,request,jsonify
 from flask_sqlalchemy import SQLAlchemy
 import json
@@ -62,9 +62,33 @@ class History(db.Model):
 # db.session.add(his1)
 # db.session.commit()
 
-@app.route('/')
+@app.route('/login',methods=["POST"])
 def index():
-        return 'yes'
+        print(request.form)
+        data=request.data
+        j_data=json.loads(data)
+        json_data=request.get_json()
+        print('request.data:',request.data)
+        #request.get_datac
+        # print('request.data.userName:',request.data.userName)
+        print('userName:',j_data['userName'])
+        print('json',json_data['userName'])
+        # print('get',request.data.get('userName'))
+        # print('values',request.values)
+        # print('get',request.form.get('userName'))
+        result_json = jsonify({"status":'200'})
+        response=flask.make_response(result_json)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'POST'
+        # response.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
+        return response
+#     return render_template('form.html')
+@app.route('/login/login',methods=["POST"])
+def index2():
+        if request.method == 'POST':
+                print('post')
+        print(request.form.get('userName'))
+        return 0
 #     return render_template('form.html')
 
 @app.route('/orders/<int:id>')
@@ -203,5 +227,5 @@ if __name__== '__main__':
         # db.drop_all()
         db.create_all()
         # db.create_all()
-        app.run(host='127.0.0.1')
+        app.run(host='192.168.137.58',port='5000')
         # app.run(host='192.168.137.1',port='9000')
