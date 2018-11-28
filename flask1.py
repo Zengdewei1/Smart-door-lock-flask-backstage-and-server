@@ -61,6 +61,10 @@ class History(db.Model):
 # db.session.add_all([his1,his2])
 # db.session.add(his1)
 # db.session.commit()
+@app.route('/')
+def menu():
+        return 'yes'
+
 
 @app.route('/login',methods=["POST"])
 def index():
