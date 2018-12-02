@@ -65,7 +65,7 @@ class History(db.Model):
 def menu():
         return 'yes'
 
-
+#不能用
 @app.route('/login',methods=["POST"])
 def index():
         print(request.form)
@@ -87,6 +87,7 @@ def index():
         # response.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
         return response
 #     return render_template('form.html')
+#不能用
 @app.route('/login/login',methods=["POST"])
 def index2():
         if request.method == 'POST':
@@ -95,11 +96,13 @@ def index2():
         return 0
 #     return render_template('form.html')
 
+#不能用
 @app.route('/orders/<int:id>')
 def getId(id):
         print (type(id))
         return 'id %s'%id
 
+#不能用
 @app.route('/form/222',methods=['GET','POST'])
 def getForm():
     if request.method == 'POST':
@@ -114,6 +117,7 @@ def getForm():
                 print (username)
                 return 'success'
 
+#不能用
 @app.route('/url',methods=['GET','POST'])
 def putJson():
         t={
@@ -132,8 +136,11 @@ def putJson():
 #         username=request.form.get('name')
 #         print(username)
 #         return 'ok'
+
+#注册路由
 @app.route('/register',methods=['POST'])
 def getAdmin():
+        #接受post请求
         adminName=request.form.get('name')
         password=request.form.get('password')
         email=request.form.get('email')
@@ -151,6 +158,7 @@ def getAdmin():
         db.session.commit()
         return 'success'
 
+#登录路由
 @app.route('/login',methods=['POST'])
 def checkAdmin():
         adminName=request.form.get('name')
@@ -177,6 +185,7 @@ def checkDoor():
         #                 return 'matchaddress'
         return 'success'
 
+#添加家庭门，用户作为管理员
 @app.route('/addfdoor',methods=['POST'])
 def addFdoor():
         doorName=request.form.get('name')
@@ -191,6 +200,7 @@ def addFdoor():
         # db.session.commit()
         return 'success'
 
+#添加公共门，用户作为管理员
 @app.route('/addpdoor',methods=['POST'])
 def addPdoor():
         doorName=request.form.get('name')
@@ -206,10 +216,11 @@ def addPdoor():
         # db.session.commit()
         return 'success'
 
+#查询一个用户在的所有门
 @app.route('/admindoor')
 def searchAdminDoor():
-        # admin=request.form.get('name')
-        historys=History.query.filter_by(adminName="zdw").all()
+        admin=request.form.get('name')#接受服务端的用户名
+        historys=History.query.filter_by(adminName=admin).all()
         # history=history.to_dict()
         # history=history.__dict__
         # history=jsonify(history)
@@ -224,7 +235,7 @@ def searchAdminDoor():
         print(list[0].data)
         # print('yes')
         # return history
-        return "admindoor"
+        return "admindoor"#返回一个json数组
 
 
 if __name__== '__main__':
