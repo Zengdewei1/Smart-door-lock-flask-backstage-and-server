@@ -6,8 +6,8 @@ import json
 
 app=Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://root:zdw20001209@localhost/lockDb'
-app.config.from_pyfile("./settings.py")
+app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://root:2000@localhost/lockDb'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
 
@@ -341,9 +341,9 @@ def isPDoor():
 #         doors=Door.query.filter_by(doorName=doorName).all()
 
 if __name__== '__main__':
-        # db.drop_all()
-        # db.create_all()
+        db.drop_all()
+        db.create_all()
         # db.create_all()
         # app.run(host='192.168.137.58',port='5000')#局域网
         # app.run()#本地 
-        app.run(host='192.168.137.1',port='9000')#局域网
+        app.run(host='0.0.0.0',port='8080')#局域网
