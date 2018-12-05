@@ -23,6 +23,7 @@ class Admin(db.Model):
         adminName=db.Column(db.String(32),unique=True)
         password=db.Column(db.String(32))
         email = db.Column(db.String(32),unique=True)
+        admins=db.relationship('History',backref="admin")#历史记录，关系引用
         #users = db.relationship('User',backref='role')
         # def __repr__(self):
         #         return'<Role:%s %s>' % (self.name ,self.id)
@@ -32,6 +33,7 @@ class Door(db.Model):
         id=db.Column(db.Integer,primary_key=True)
         doorName=db.Column(db.String(32),unique=True)
         address=db.Column(db.String(32),unique=True)
+        doors=db.relationship('History',backref="door")#历史记录，关系引用
         # def __repr__(self):
         #         return'<Role:%s %s %s %s>' % (self.name ,self.id,self.email,self.password)
 
@@ -40,14 +42,16 @@ class History(db.Model):
         id=db.Column(db.Integer,primary_key=True)
         doorName=db.Column(db.String(32),db.ForeignKey('doors.doorName'))
         adminName=db.Column(db.String(32),db.ForeignKey('admins.adminName'))#外键
-        right = db.Column(db.String(32))
+        right = db.Column(db.String(32))#可选，owner或者user
         charge = db.Column(db.String(32))
+        
         def to_json(self):
                 json_history={
-                        'doorName':self.doorName,
-                        'adminName':self.adminName,
-                        'right':self.right,
-                        'charge':self.charge,
+                        "doorName":self.doorName,#门的名字
+                        "adminName":self.adminName,
+                        "right":self.right,
+                        "charge":self.charge,
+                        "address":self.door.address#门的蓝牙
                 }
                 return json_history
 # door1=Door(doorName="10",address="127.0.0.1")
@@ -65,27 +69,27 @@ class History(db.Model):
 def menu():
         return 'yes'
 
-#不能用
-@app.route('/login',methods=["POST"])
-def index():
-        print(request.form)
-        data=request.data
-        j_data=json.loads(data)
-        json_data=request.get_json()
-        print('request.data:',request.data)
-        #request.get_datac
-        # print('request.data.userName:',request.data.userName)
-        print('userName:',j_data['userName'])
-        print('json',json_data['userName'])
-        # print('get',request.data.get('userName'))
-        # print('values',request.values)
-        # print('get',request.form.get('userName'))
-        result_json = jsonify({"status":'200'})
-        response=flask.make_response(result_json)
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'POST'
-        # response.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
-        return response
+# #不能用
+# @app.route('/login',methods=["POST"])
+# def index():
+#         print(request.form)
+#         data=request.data
+#         j_data=json.loads(data)
+#         json_data=request.get_json()
+#         print('request.data:',request.data)
+#         #request.get_datac
+#         # print('request.data.userName:',request.data.userName)
+#         print('userName:',j_data['userName'])
+#         print('json',json_data['userName'])
+#         # print('get',request.data.get('userName'))
+#         # print('values',request.values)
+#         # print('get',request.form.get('userName'))
+#         result_json = jsonify({"statusCode":0})
+#         response=flask.make_response(result_json)
+#         response.headers['Access-Control-Allow-Origin'] = '*'
+#         response.headers['Access-Control-Allow-Methods'] = 'POST'
+#         # response.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
+#         return response
 #     return render_template('form.html')
 #不能用
 @app.route('/login/login',methods=["POST"])
@@ -141,14 +145,19 @@ def putJson():
 @app.route('/register',methods=['POST'])
 def getAdmin():
         #接受post请求
-        adminName=request.form.get('name')
-        password=request.form.get('password')
-        email=request.form.get('email')
-        print(adminName,password,email)
-        print(Admin.query.all())
+        data=request.data
+        j_data=json.loads(data)
+        print(j_data["name"])
+        adminName=j_data["name"]
+        password=j_data["password"]
+        email=j_data["email"]
+        # adminName=request.form.get('name')
+        # password=request.form.get('password')
+        # email=request.form.get('email')
+        print("get admin,pass,email:",adminName,password,email)
+        print("all admin:",Admin.query.all())
         for user in Admin.query.all():
-                print('yes')
-                print(user.adminName)
+                print("name:",user.adminName)
                 if adminName == user.adminName:
                         return 'samename'
                 elif email == user.email:
@@ -163,8 +172,8 @@ def getAdmin():
 def checkAdmin():
         adminName=request.form.get('name')
         password=request.form.get('password')
-        print(adminName,password)
-        print(Admin.query.all())
+        print("password",adminName,password)
+        print("all admin",Admin.query.all())
         for user in Admin.query.all():
                 if(adminName == user.adminName):
                         if(password == user.password):
@@ -173,74 +182,107 @@ def checkAdmin():
                                 return 'wrongpass'
         return 'nouser'
 
+#查询是否有这个门
 @app.route('/hasdoor',methods=['POST'])
 def checkDoor():
         doorName=request.form.get('name')
         address=request.form.get('address')
-        print(doorName,address)
-        # for door in Door.query.all():
-        #         if(doorName == door.doorName):
-        #                 return 'matchname'
-        #         elif(address==door.address):
-        #                 return 'matchaddress'
+        print("get door name:",doorName)
+        print("get address:",address)
+        for door in Door.query.all():
+                if(doorName == door.doorName):
+                        return 'matchname'
+                elif(address==door.address):
+                        return 'matchaddress'
         return 'success'
 
 #添加家庭门，用户作为管理员
-@app.route('/addfdoor',methods=['POST'])
+@app.route('/addFdoor',methods=['POST'])
 def addFdoor():
-        doorName=request.form.get('name')
-        address=request.form.get('address')
-        adminName=request.form.get('owner')
-        right='owner'
-        print(doorName,adminName,address,right)
-        # door=Door(doorName=doorName,address=address)
-        # history=Histoty(doorName=doorName,adminName=adminName,right=right)
-        # db.session.add(history)
-        # db.session.add(door)
-        # db.session.commit()
+        data=request.data
+        j_data=json.loads(data)
+        print(j_data["name"])
+        # doorName=request.form.get('name')#门的名字
+        # address=request.form.get('address')
+        # adminName=request.form.get('owner')#用户名字
+        doorName=j_data["name"]
+        address=j_data["address"]
+        adminName=j_data["owner"]
+        print("get door:",doorName)
+
+        right="owner"
+        print("all get:",doorName,adminName,address,right)
+        door=Door(doorName=doorName,address=address)
+        db.session.add(door)
+        db.session.commit()
+        history=History(doorName=doorName,adminName=adminName,right=right)
+        db.session.add(history)
+        db.session.commit()
         return 'success'
 
 #添加公共门，用户作为管理员
-@app.route('/addpdoor',methods=['POST'])
+@app.route('/addPdoor',methods=['POST'])
 def addPdoor():
         doorName=request.form.get('name')
         address=request.form.get('address')
         adminName=request.form.get('owner')
         charge=request.form.get('money')
-        right='owner'
+        right="owner"
         print(doorName,adminName,address,right)
-        # door=Door(doorName=doorName,address=address)
-        # history=Histoty(doorName=doorName,adminName=adminName,right=right,charge=charge)
-        # db.session.add(history)
-        # db.session.add(door)
-        # db.session.commit()
+        door=Door(doorName=doorName,address=address)
+        history=Histoty(doorName=doorName,adminName=adminName,right=right,charge=charge)
+        db.session.add(history)
+        db.session.add(door)
+        db.session.commit()
         return 'success'
 
-#查询一个用户在的所有门
-@app.route('/admindoor')
+#查询一个用户可以开的所有门
+@app.route('/adminDoor',methods=['POST'])
 def searchAdminDoor():
-        admin=request.form.get('name')#接受服务端的用户名
+        # admin=request.form.get('name')#接受客户端的用户名
+        data=request.data#postman测试
+        j_data=json.loads(data)
+        admin=j_data["name"]
         historys=History.query.filter_by(adminName=admin).all()
-        # history=history.to_dict()
+        # history=history.to_dict()#转化为字典
         # history=history.__dict__
         # history=jsonify(history)
-        list=[]
+        dict1={}#json字典
+        count=0#从0开始计数
         for history in historys:
                 history=history.to_json()
+                history=json.dumps(history)
+                dict1[str(count)]=history
+                count+=1
                 print(history)
-                history=jsonify(history)
-                list.append(history)
-                print(history.data)
-        # list=jsonify(list)
-        print(list[0].data)
-        # print('yes')
-        # return history
-        return "admindoor"#返回一个json数组
+        dict1=jsonify(dict1)
+        print(type(dict1))
+        return dict1#返回一个json数组
 
+#查询一个用户管理的所有门
+@app.route('/adminOwnerDoor',methods=['POST'])
+def searchAdminOwnerDoor():
+        # admin=request.form.get('name')
+        data=request.data#postman测试
+        j_data=json.loads(data)
+        admin=j_data["name"]
+        historys=History.query.filter_by(adminName=admin).all()
+        dict1={}
+        count=0
+        for history in historys:
+                if(history.right=="owner"):#是否为管理者
+                        history=history.to_json()
+                        history=json.dumps(history)
+                        dict1[str(count)]=history
+                        count+=1
+                        print(history)
+        dict1=jsonify(dict1)
+        return dict1#返回一个json数组
 
 if __name__== '__main__':
         # db.drop_all()
-        db.create_all()
         # db.create_all()
-        app.run(host='192.168.137.58',port='5000')
-        # app.run(host='192.168.137.1',port='9000')
+        # db.create_all()
+        # app.run(host='192.168.137.58',port='5000')#局域网
+        app.run()#本地 
+        # app.run(host='192.168.137.1',port='9000')#局域网
