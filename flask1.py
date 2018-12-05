@@ -223,16 +223,24 @@ def addFdoor():
 #添加公共门，用户作为管理员
 @app.route('/addPdoor',methods=['POST'])
 def addPdoor():
-        doorName=request.form.get('name')
-        address=request.form.get('address')
-        adminName=request.form.get('owner')
-        charge=request.form.get('money')
+        data=request.data#postman
+        j_data=json.loads(data)
+        print(j_data["name"])
+        doorName=j_data["name"]
+        address=j_data["address"]
+        adminName=j_data["owner"]
+        charge=j_data["money"]
+        # doorName=request.form.get('name')#product
+        # address=request.form.get('address')
+        # adminName=request.form.get('owner')
+        # charge=request.form.get('money')
         right="owner"
-        print(doorName,adminName,address,right)
+        print("all get:",doorName,adminName,address,right)
         door=Door(doorName=doorName,address=address)
-        history=Histoty(doorName=doorName,adminName=adminName,right=right,charge=charge)
-        db.session.add(history)
         db.session.add(door)
+        db.session.commit()
+        history=History(doorName=doorName,adminName=adminName,right=right,charge=charge)
+        db.session.add(history)
         db.session.commit()
         return 'success'
 
@@ -251,10 +259,11 @@ def searchAdminDoor():
         count=0#从0开始计数
         for history in historys:
                 history=history.to_json()
+                print("his:",type(history))
                 history=json.dumps(history)
                 dict1[str(count)]=history
                 count+=1
-                print(history)
+                print("history type:",type(history))
         dict1=jsonify(dict1)
         print(type(dict1))
         return dict1#返回一个json数组
@@ -278,6 +287,41 @@ def searchAdminOwnerDoor():
                         print(history)
         dict1=jsonify(dict1)
         return dict1#返回一个json数组
+
+#添加用户为家庭门的使用者
+@app.route('/addFDoorUser',methods=['POST'])
+def addFDoorUser():
+        data=request.data#postman
+        j_data=json.loads(data)
+        doorName=j_data["doorName"]
+        owner=j_data["owner"]
+        member=j_data["member"]
+        historys=History.query.filter_by(doorName=doorName).all()
+        if(not historys):
+                return "nofound"
+        for history in historys:
+                if(member==history.adminName):
+                        return "adready"
+        history=History(doorName=doorName,adminName=member,right="user")
+        db.session.add(history)
+        db.session.commit()
+        return "success"
+
+   
+@app.route('/isPDoor',methods=['POST'])
+def isPDoor():
+        data=request.data#postman
+        j_data=json.loads(data)
+        address=j_data["address"]
+        
+
+@app.route('/addPDoorUser',methods=['POST'])
+def addDoorUser():
+        data=request.data#postman
+        j_data=json.loads(data)
+        doorName=j_data["doorName"]
+        adminName=j_data["adminname"]
+        doors=Door.query.filter_by(doorName=doorName).all()
 
 if __name__== '__main__':
         # db.drop_all()
