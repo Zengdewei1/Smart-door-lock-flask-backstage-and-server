@@ -66,7 +66,7 @@ CREATE TABLE `doors` (
 
 LOCK TABLES `doors` WRITE;
 /*!40000 ALTER TABLE `doors` DISABLE KEYS */;
-INSERT INTO `doors` VALUES (1,'yhm','adfdfrw43'),(4,'mydo','adfdfradsa3'),(5,'mydsad','bbbdsadadsa3'),(6,NULL,NULL),(7,NULL,NULL),(8,'mydsddaad','cccsadadsa3'),(9,'mydsao090d','bbbdsadadsaa3');
+INSERT INTO `doors` VALUES (4,'mydo','adfdfradsa3'),(5,'mydsad','bbbdsadadsa3'),(6,NULL,NULL),(7,NULL,NULL),(8,'mydsddaad','cccsadadsa3'),(9,'mydsao090d','bbbdsadadsaa3');
 /*!40000 ALTER TABLE `doors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -88,7 +88,7 @@ CREATE TABLE `historys` (
   KEY `adminName` (`adminName`),
   CONSTRAINT `historys_ibfk_1` FOREIGN KEY (`doorName`) REFERENCES `doors` (`doorname`),
   CONSTRAINT `historys_ibfk_2` FOREIGN KEY (`adminName`) REFERENCES `admins` (`adminname`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,7 +97,7 @@ CREATE TABLE `historys` (
 
 LOCK TABLES `historys` WRITE;
 /*!40000 ALTER TABLE `historys` DISABLE KEYS */;
-INSERT INTO `historys` VALUES (2,'mydo','zdw','owner',NULL),(3,'mydsad','zdw','owner',NULL),(4,NULL,NULL,'owner',NULL),(5,NULL,NULL,'owner',NULL),(6,'mydsddaad','zdw','owner','5'),(7,'mydsao090d','yhm','owner',NULL),(8,'mydsao090d','zdw','user',NULL);
+INSERT INTO `historys` VALUES (2,'mydo','zdw','owner',NULL),(3,'mydsad','zdw','owner',NULL),(4,NULL,NULL,'owner',NULL),(5,NULL,NULL,'owner',NULL),(6,'mydsddaad','zdw','owner','5'),(7,'mydsao090d','yhm','owner',NULL),(8,'mydsao090d','zdw','user',NULL),(9,'mydsad','yhm','user',NULL),(10,'mydsddaad','yhm','user',NULL);
 /*!40000 ALTER TABLE `historys` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -110,4 +110,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-12-05 22:20:28
+-- Dump completed on 2018-12-05 22:55:16
