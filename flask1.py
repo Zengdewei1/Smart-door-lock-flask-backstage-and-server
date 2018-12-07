@@ -14,8 +14,10 @@ db = SQLAlchemy(app)
 def to_dict(self):
         return{c.name:getattr(self,c.name,None) for c in self.__table__.columns}
 
-# def to_json():
-
+def jsonLoad():
+        data=request.data
+        j_data=json.loads(data)
+        return j_data
 
 class Admin(db.Model):
         __tablename__='admins'
@@ -145,23 +147,23 @@ def putJson():
 @app.route('/register',methods=['POST'])
 def getAdmin():
         #接受post请求
-        data=request.data
-        j_data=json.loads(data)
-        print(j_data["name"])
-        adminName=j_data["name"]
-        password=j_data["password"]
-        email=j_data["email"]
-        # adminName=request.form.get('name')
-        # password=request.form.get('password')
-        # email=request.form.get('email')
+        # j_data=jsonLoad()
+        # print(j_data["name"])
+        # adminName=j_data["name"]
+        # password=j_data["password"]
+        # email=j_data["email"]
+        print('yes')
+        adminName=request.form.get('name')
+        password=request.form.get('password')
+        email=request.form.get('email')
         print("get admin,pass,email:",adminName,password,email)
-        print("all admin:",Admin.query.all())
-        for user in Admin.query.all():
-                print("name:",user.adminName)
-                if adminName == user.adminName:
-                        return 'samename'
-                elif email == user.email:
-                        return 'sameemail'
+        if Admin.query.all():
+                for user in Admin.query.all():
+                        print("name:",user.adminName)
+                        if adminName == user.adminName:
+                                return 'samename'
+                        elif email == user.email:
+                                return 'sameemail'
         admin=Admin(adminName=adminName,password=password,email=email)
         db.session.add(admin)
         db.session.commit()
@@ -300,6 +302,9 @@ def addFDoorUser():
         member=request.form.get("member")
         print("all get:",address,owner,member)
         door=Door.query.filter_by(address=address).first()
+        user=Admin.query.filter_by(adminName=member).first()
+        if(not user):
+                return "nofound"
         if(not door):
                 return "nofound"
         doorName=door.doorName
@@ -309,12 +314,15 @@ def addFDoorUser():
                 return "nofound"
         for history in historys:
                 if(member==history.adminName):
-                        return "adready"
+                        return "already"
         historyNew=History(doorName=doorName,adminName=member,right="user")
         db.session.add(historyNew)
         db.session.commit()
         return "success"
 
+@app.route('/deleteFDoorUser',methods=['POST'])
+def deleteFDoorUser():
+        return 'success'
    
 @app.route('/isPDoor',methods=['POST'])
 def isPDoor():
@@ -339,7 +347,7 @@ def isPDoor():
 #         doorName=j_data["doorName"]
 #         adminName=j_data["adminname"]
 #         doors=Door.query.filter_by(doorName=doorName).all()
-
+app.debug=True
 if __name__== '__main__':
         # db.drop_all()
         # db.create_all()
